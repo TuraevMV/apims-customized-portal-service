@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: apims-cps
+  profiles:
+    active: dev
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: apims-config-server
+eureka:
+  client:
+    service-url:
+      defaultZone: http://apims/eureka
