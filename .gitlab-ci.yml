@@ -1,0 +1,53 @@
+variables:
+  REG: nexus.mmk.chel.su
+  IMAGE: $REG/apims/apims-cps
+  PROXY: http://nexus.mmk.chel.su:8888
+
+stages:
+  - compile
+  - build
+  - publish
+
+compile:
+  stage: compile
+  image: maven:3.6.3-openjdk-8
+  tags:
+    - docker
+  except:
+    - tags
+  script:
+    - mvn clean compile -DskipTests
+
+build:
+  stage: build
+  image: maven:3.6.3-openjdk-8
+  tags:
+    - docker
+  only:
+    - tags
+  artifacts:
+    paths:
+      - ./target/*.jar
+    expire_in: 30 mins
+  script:
+    - mvn clean package -DskipTests
+
+publish:docker:
+  stage: publish
+  only:
+    - tags
+  tags:
+    - docker
+  image: docker:stable
+  variables:
+    DOCKER_OPTS: "--insecure-registry=nexus.mmk.chel.su"
+    DOCKER_HOST: "tcp://lordgaav__dind-options:2375"
+    HTTP_PROXY: "$PROXY"
+    HTTPS_PROXY: "$PROXY"
+    NO_PROXY: "$REG,lordgaav__dind-options"
+  services:
+    - lordgaav/dind-options:latest
+  script:
+    - docker login -u $NEXUS_USER -p $NEXUS_PASSWD $REG
+    - docker build -t $IMAGE:${CI_BUILD_REF_NAME} --build-arg http_proxy=$PROXY --build-arg https_proxy=$PROXY --build-arg no_proxy=$REG  -f ci.dockerfile .
+    - docker push $IMAGE:${CI_BUILD_REF_NAME}

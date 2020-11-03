@@ -11,4 +11,4 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://apims/eureka
+      defaultZone: http://apims:9900/eureka

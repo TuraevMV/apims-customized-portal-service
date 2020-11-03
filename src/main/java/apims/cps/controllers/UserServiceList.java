@@ -2,6 +2,7 @@ package apims.cps.controllers;
 
 import apims.cps.components.DatabaseTools;
 import apims.cps.types.UDBQMParameters;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/")
 @CrossOrigin("*")
+@Api(value="Custom portal service list", tags = "Service List")
 public class UserServiceList {
     @Value("${userServiceListQuery}")
     private String userServiceListQuery;
@@ -38,7 +40,7 @@ public class UserServiceList {
         HttpHeaders responseHeaders     = new HttpHeaders();
         responseHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpStatus responseStatus       = HttpStatus.OK;
-        String resultValue = "[]";
+        String resultValue;
 
         //Формируем параметры для UDBQM
         BigDecimal userID = BigDecimal.valueOf(37538377);
@@ -49,6 +51,6 @@ public class UserServiceList {
         resultValue = databaseTools.UDBQM(serverType, userServiceListQuery, listParameters );
 
 
-        return new ResponseEntity<String>(resultValue, responseHeaders, responseStatus);
+        return new ResponseEntity<>(resultValue, responseHeaders, responseStatus);
     }
 }
