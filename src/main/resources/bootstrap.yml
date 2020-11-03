@@ -2,7 +2,7 @@ spring:
   application:
     name: apims-cps
   profiles:
-    active: dev
+    active: prod
   cloud:
     config:
       discovery:
