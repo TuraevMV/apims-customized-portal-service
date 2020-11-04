@@ -63,11 +63,8 @@ public class UserServiceList {
             listParameters.add(pParamItem);
             resultValue = databaseTools.UDBQM(serverType, userServiceListQuery, listParameters );
         }
-
         return new ResponseEntity<>(resultValue, responseHeaders, responseStatus);
     }
-
-
 
     public boolean validateToken(String token) {
         try {
@@ -86,5 +83,4 @@ public class UserServiceList {
         }
         return false;
     }
-
 }
