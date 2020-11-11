@@ -1,2 +1,2 @@
-# apims-customized-portal-service
+# Naumen Self-Service Portal
 Изменение списка доступных услуг для отображения на портале
