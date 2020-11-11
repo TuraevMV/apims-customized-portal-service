@@ -18,7 +18,7 @@
 >      location /sd/ {
 >           #перехват потока с портала
 >           error_page 420 = @slm_redirect;
->           if ( $arg_func = "**modules.portalRest.listUserSlmServices**" ) { return 420; }
+>           if ( $arg_func = "modules.portalRest.listUserSlmServices" ) { return 420; }
 >           ##########################
 >       ....
 
