@@ -10,7 +10,7 @@
 
 ##Решение
 При загрузке страницы портал посылает запрос вида:
->https://server/sd/services/portalrest/exec-post?func=modules.portalRest.listUserSlmServices&params=requestContent, user
+>       https://server/sd/services/portalrest/exec-post?func=modules.portalRest.listUserSlmServices&params=requestContent, user
 
 Важный параметр запроса **func=modules.portalRest.listUserSlmServices**
 Так как в системе в качестве прокси web-сервера используется [Nginx](https://nginx.org/ru/),
