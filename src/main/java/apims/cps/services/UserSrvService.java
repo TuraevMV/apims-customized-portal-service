@@ -17,5 +17,4 @@ public class UserSrvService {
     public ResponseEntity<UserServiceListModel[]> getAllUserSrvList(String serverType, String jwtToken, RequestBodyModel requestBody) {
         return userSrvRepository.getAllUserSrvList(serverType, jwtToken, requestBody);
     };
-
 }
