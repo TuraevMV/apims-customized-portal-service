@@ -2,6 +2,12 @@ package apims.cps.repository.nsd;
 
 import apims.cps.model.RequestBodyModel;
 import apims.cps.model.UserServiceListModel;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.*;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -10,83 +16,103 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
+@Slf4j
 @Transactional
 @Repository
 public class UserSrvRepository {
-    private final JdbcTemplate nsdTemplate;
+    @Value("${userServiceListQuery}")
+    private String userServiceListQuery;
 
-    public UserSrvRepository(JdbcTemplate nsdTemplate) {
-        this.nsdTemplate = nsdTemplate;
+    @Value("${allUserServiceListQuery}")
+    private String allUserServiceListQuery;
+
+    private final JdbcTemplate jdbcNSD;
+    private final JdbcTemplate jdbcNSD_DEV;
+
+    public UserSrvRepository(@Qualifier("jdbcTemplateNSD") JdbcTemplate jdbcTemplate1,
+                             @Qualifier("jdbcTemplateNSD_DEV") JdbcTemplate jdbcTemplate2) {
+        this.jdbcNSD = jdbcTemplate1;
+        this.jdbcNSD_DEV = jdbcTemplate2;
     }
 
-    public ResponseEntity<UserServiceListModel[]> getAllUserSrvList(String serverType, String jwtToken, RequestBodyModel requestBody){
+    public ResponseEntity<UserServiceListModel[]> getAllUserSrvList(String serverType, String jwtToken, RequestBodyModel requestBody) {
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-        HttpStatus responseStatus = HttpStatus.NO_CONTENT;
-        ResponseEntity responseEntity = new ResponseEntity<UserServiceListModel[]>(null, responseHeaders, responseStatus);
+        ResponseEntity responseEntity = new ResponseEntity<UserServiceListModel[]>(null, responseHeaders, HttpStatus.NO_CONTENT);
+        String result = null;
+        String queryString;
 
+        log.debug("============== Cookies check ===============");
+        log.debug("access_token =>" + jwtToken);
+        log.debug("============================================");
 
+        try {
+            //Откусим подпись. нам не интересно
+            jwtToken = jwtToken.replaceAll("Bearer ","");
+            int i = jwtToken.lastIndexOf('.');
+            String withoutSignature = jwtToken.substring(0, i+1);
 
+            if (validateToken(withoutSignature)) {
 
+                //Получим идентификатор клиента
+                Jwt<Header, Claims> untrusted = Jwts.parser().parseClaimsJwt(withoutSignature);
+                String userUUID = untrusted.getBody().get("userUUID").toString().replace("employee$","");
+                log.debug("userUUID =>" + userUUID);
+                BigDecimal userID = BigDecimal.valueOf(Long.parseLong(userUUID));
+
+                //Определимся с видом запроса ВСЕ сервисы или ПОПУЛЯРНЫЕ
+                log.debug("Количество запросов для возврата =>" + requestBody.getMaxResult());
+                if (requestBody.getMaxResult() >12) {
+                    //получение сервисов ПОПУЛЯРНЫЕ
+                    queryString = userServiceListQuery;
+                } else {
+                    queryString = allUserServiceListQuery;
+                }
+
+                switch (serverType)
+                {
+                    case "dev" :
+                        result = this.jdbcNSD_DEV.queryForObject(queryString,new Object[]{userID}, String.class);
+                        break;
+                    case "prod":
+                        result = this.jdbcNSD_DEV.queryForObject(queryString,new Object[]{userID}, String.class);
+                        break;
+                }
+
+                try {
+                    //result = result.substring(1,result.length()-1);
+                    log.debug("Result =>" + result);
+                    responseEntity = new ResponseEntity<UserServiceListModel[]>(new ObjectMapper().readValue(result, UserServiceListModel[].class ), responseHeaders, HttpStatus.OK);
+                } catch (JsonProcessingException e) {
+                    responseEntity = new ResponseEntity<UserServiceListModel[]>(null, responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+                    log.debug(e.toString());
+                }
+
+            }
+        } catch (Exception e) {
+            responseEntity = new ResponseEntity<UserServiceListModel[]>(null, responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+            log.debug(e.toString());
+        }
         return responseEntity;
     }
+
+    private boolean validateToken(String token) {
+        try {
+            Jwts.parser().parseClaimsJwt(token);
+            return true;
+        } catch (ExpiredJwtException expEx) {
+            log.debug("Token expired");
+        } catch (UnsupportedJwtException unsEx) {
+            log.debug("Unsupported jwt");
+        } catch (MalformedJwtException mjEx) {
+            log.debug("Malformed jwt");
+        } catch (SignatureException sEx) {
+            log.debug("Invalid signature");
+        } catch (Exception e) {
+            log.debug("invalid token");
+        }
+        return false;
+    }
 }
-
-
-/*
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.jackrutorial.model.User;
-
-@Transactional
-@Repository
-public class UserDaoImpl {
-
- @Autowired
- @Qualifier("jdbcTemplate1")
- private JdbcTemplate jdbcTemplate1;
-
- @Autowired
- @Qualifier("jdbcTemplate2")
- private JdbcTemplate jdbcTemplate2;
-
- public List getAllUser() {
-  String sql1 = "select username,email from user1";
-  //get users list from db1
-  List list1 = jdbcTemplate1.query(sql1, new UserRowMapper());
-
-  String sql2 = "select username,email from user2";
-  //get users list from db2
-  List list2 = jdbcTemplate2.query(sql2, new UserRowMapper());
-
-  List listAll = Stream.concat(list1.stream(), list2.stream())
-       .collect(Collectors.toList());
-  return listAll;
- }
-
- class UserRowMapper implements RowMapper{
-
-  @Override
-  public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-   User user = new User();
-   user.setUsername(rs.getString("username"));
-   user.setEmail(rs.getString("email"));
-
-   return user;
-  }
-
- }
-
-}
- */

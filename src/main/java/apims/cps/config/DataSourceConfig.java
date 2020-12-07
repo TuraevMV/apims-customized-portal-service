@@ -11,7 +11,6 @@ import javax.sql.DataSource;
 
 @Configuration
 public class DataSourceConfig {
-
     @Bean(name = "nsd")
     @ConfigurationProperties(prefix = "app.datasource.nsd")
     public DataSource nsdDataSource() {
@@ -33,5 +32,4 @@ public class DataSourceConfig {
     public JdbcTemplate jdbcTemplate2(@Qualifier("nsd.dev") DataSource ds) {
         return new JdbcTemplate(ds);
     }
-
 }
