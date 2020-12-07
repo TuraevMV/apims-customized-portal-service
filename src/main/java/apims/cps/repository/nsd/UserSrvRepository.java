@@ -31,7 +31,7 @@ public class UserSrvRepository {
     private final JdbcTemplate jdbcNSD_DEV;
 
     public UserSrvRepository(@Qualifier("jdbcTemplateNSD") JdbcTemplate jdbcTemplate1,
-                             @Qualifier("jdbcTemplateNSD_DEV") JdbcTemplate jdbcTemplate2) {
+                             @Qualifier("jdbcTemplateNSD-DEV") JdbcTemplate jdbcTemplate2) {
         this.jdbcNSD = jdbcTemplate1;
         this.jdbcNSD_DEV = jdbcTemplate2;
     }

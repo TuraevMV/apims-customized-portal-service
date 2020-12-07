@@ -22,14 +22,14 @@ public class DataSourceConfig {
         return new JdbcTemplate(ds);
     }
 
-    @Bean(name = "nsd.dev")
-    @ConfigurationProperties(prefix = "app.datasource.nsd.dev")
+    @Bean(name = "nsd-dev")
+    @ConfigurationProperties(prefix = "app.datasource.nsd-dev")
     public DataSource nsdDataSourceDev() {
         return DataSourceBuilder.create().build();
     }
 
-    @Bean(name = "jdbcTemplateNSD_DEV")
-    public JdbcTemplate jdbcTemplate2(@Qualifier("nsd.dev") DataSource ds) {
+    @Bean(name = "jdbcTemplateNSD-DEV")
+    public JdbcTemplate jdbcTemplate2(@Qualifier("nsd-dev") DataSource ds) {
         return new JdbcTemplate(ds);
     }
 }
