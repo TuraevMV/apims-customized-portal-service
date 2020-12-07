@@ -2,7 +2,6 @@ package apims.cps.repository.nsd;
 
 import apims.cps.model.RequestBodyModel;
 import apims.cps.model.UserServiceListModel;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +67,7 @@ public class UserSrvRepository {
                     //получение сервисов ПОПУЛЯРНЫЕ
                     queryString = userServiceListQuery;
                 } else {
+                    //получение сервисов ВСЕ
                     queryString = allUserServiceListQuery;
                 }
 
@@ -77,19 +77,11 @@ public class UserSrvRepository {
                         result = this.jdbcNSD_DEV.queryForObject(queryString,new Object[]{userID}, String.class);
                         break;
                     case "prod":
-                        result = this.jdbcNSD_DEV.queryForObject(queryString,new Object[]{userID}, String.class);
+                        result = this.jdbcNSD.queryForObject(queryString,new Object[]{userID}, String.class);
                         break;
                 }
-
-                try {
-                    //result = result.substring(1,result.length()-1);
                     log.debug("Result =>" + result);
                     responseEntity = new ResponseEntity<UserServiceListModel[]>(new ObjectMapper().readValue(result, UserServiceListModel[].class ), responseHeaders, HttpStatus.OK);
-                } catch (JsonProcessingException e) {
-                    responseEntity = new ResponseEntity<UserServiceListModel[]>(null, responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
-                    log.debug(e.toString());
-                }
-
             }
         } catch (Exception e) {
             responseEntity = new ResponseEntity<UserServiceListModel[]>(null, responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
