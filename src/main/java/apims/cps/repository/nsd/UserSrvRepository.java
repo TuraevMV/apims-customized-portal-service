@@ -1,6 +1,5 @@
 package apims.cps.repository.nsd;
 
-import apims.cps.config.CustomSQLErrorCodeTranslator;
 import apims.cps.model.RequestBodyModel;
 import apims.cps.model.UserServiceListModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,11 +42,6 @@ public class UserSrvRepository {
         ResponseEntity responseEntity = new ResponseEntity<UserServiceListModel[]>(null, responseHeaders, HttpStatus.NO_CONTENT);
         String result = null;
         String queryString;
-
-        CustomSQLErrorCodeTranslator customSQLErrorCodeTranslator =
-                new CustomSQLErrorCodeTranslator();
-        this.jdbcNSD.setExceptionTranslator(customSQLErrorCodeTranslator);
-        this.jdbcNSD_DEV.setExceptionTranslator(customSQLErrorCodeTranslator);
 
         log.debug("============== Cookies check ===============");
         log.debug("access_token =>" + jwtToken);
