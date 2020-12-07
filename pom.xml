@@ -90,6 +90,12 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>nsd</groupId>
+			<artifactId>nsd-itam-api</artifactId>
+			<version>0</version>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 	<dependencyManagement>
