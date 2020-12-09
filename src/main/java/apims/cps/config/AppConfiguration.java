@@ -31,7 +31,7 @@ public class AppConfiguration {
         return new ApiInfo(
                 "NSD Custom Portal Service REST API",
                 "Набор сервисов проекта",
-                "2.0",
+                "2.1",
                 null,
                 new Contact("Maxim Turaev", "https://github.com/TuraevMV", "turaev.mv@gmail.com"),
                 null, null, Collections.emptyList());
